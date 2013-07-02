@@ -15,13 +15,17 @@ var datastore = {};
 function list_commands()
 {
 	var s = "txtool command summary:\n";
-	s += "help\tList this command summary\n";
-	s += "init\tInitialize new transaction state database\n";
-	s += "multisig N-REQUIRED KEY1 KEY2 KEY3...\n\tBegin new multi-sig tx\n";
+	s += "help\t\tList this command summary\n";
+	s += "init\t\tInitialize new transaction state database\n";
+	s += "multisig N-REQUIRED KEY1 KEY2 KEY3...\n\t\tBegin new multi-sig tx\n";
 	s += "nreq N-REQUIRED\tSpecific number of sigs required for a multisig tx\n";
-	s += "pubkeys KEY1 KEY2 KEY3...\tAdd to list of pubkeys / bitcoin addresses\n";
+	s += "pubkeys KEY1 KEY2 KEY3...\n\t\tAdd to list of pubkeys / bitcoin addresses\n";
 	s += "pubkeys.clear\tClear list of pubkeys\n";
-	s += "show\tInspect internal transaction state\n";
+	s += "raw SERIALIZED-TX\n\t\tInput serialized transaction from command line\n";
+	s += "raw.read FILE\tInput serialized transaction from file\n";
+	s += "raw.write FILE\tOutput serialize transaction to file\n";
+	s += "raw.clear\tClear serialized tx data\n";
+	s += "show\t\tInspect internal transaction state\n";
 	console.log(s);
 }
 
@@ -82,6 +86,39 @@ function cmd_pubkeys()
 	write_datastore(function(err) {});
 }
 
+function cmd_raw(in_str)
+{
+	var re = new RegExp('([\\da-fA-F]+)');
+	in_str = String(in_str);
+	var matches = in_str.match(re);
+	if (matches == null)
+		throw new Error("Hex transaction data not supplied");
+
+	var hexstr = matches[1];
+	datastore['raw'] = hexstr;
+
+	write_datastore(function(err) {});
+}
+
+function raw_read_cb(err, data)
+{
+	if (err) throw err;
+	cmd_raw(data);
+}
+
+function cmd_raw_read(filename)
+{
+	fs.readFile(filename, {'encoding':'utf8'}, raw_read_cb);
+}
+
+function cmd_raw_write(filename)
+{
+	if (datastore['raw'] == undefined)
+		throw new Error("No raw transaction data stored in memory");
+	
+	fs.writeFile(filename, datastore['raw'], function(err) {});
+}
+
 function main()
 {
 	if (argv._.length == 0) {
@@ -123,6 +160,26 @@ function main()
 
 	case "pubkeys.clear":
 		delete datastore['pubkeys'];
+		write_datastore(function(err) {});
+		break;
+
+	case "raw":
+		if (argv._.length < 2)
+			throw new Error("Missing required hex-string param");
+		cmd_raw(argv._[1]);
+		break;
+	case "raw.read":
+		if (argv._.length < 2)
+			throw new Error("Missing required filename param");
+		cmd_raw_read(argv._[1]);
+		break;
+	case "raw.write":
+		if (argv._.length < 2)
+			throw new Error("Missing required filename param");
+		cmd_raw_write(argv._[1]);
+		break;
+	case "raw.clear":
+		delete datastore['raw'];
 		write_datastore(function(err) {});
 		break;
 
