@@ -5,7 +5,7 @@ var fs = require('fs');
 var argv = require('optimist')
 	.usage('Build bitcoin transactions\nUsage: $0 [options] COMMAND [command parameters]')
 	.alias('f', 'file')
-	.describe('f', 'Load/store transaction state from FILE')
+	.describe('f', 'Load/store transaction state to/from FILE')
 	.demand(['f'])
 	.argv
 ;
@@ -22,13 +22,14 @@ function list_commands()
 	var s = "txtool command summary:\n";
 	s += "help\tList this command summary\n";
 	s += "init\tInitialize new transaction state database\n";
+	s += "show\tInspect internal transaction state\n";
 	console.log(s);
 }
 
 function main()
 {
 	if (argv._.length == 0) {
-		console.log("No command specified.");
+		console.error("No command specified.");
 		list_commands();
 		return;
 	}
@@ -41,7 +42,7 @@ function main()
 
 	switch (cmd) {
 	default:
-		console.log("Unknown command", cmd);
+		console.error("Unknown command", cmd);
 		// fall through
 
 	case "help":
@@ -50,6 +51,10 @@ function main()
 	
 	case "init":
 		write_datastore(function(err) {});
+		break;
+
+	case "show":
+		console.dir(datastore);
 		break;
 	}
 }
