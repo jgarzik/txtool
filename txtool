@@ -1,0 +1,58 @@
+#!/usr/bin/env node
+
+var fs = require('fs');
+
+var argv = require('optimist')
+	.usage('Build bitcoin transactions\nUsage: $0 [options] COMMAND [command parameters]')
+	.alias('f', 'file')
+	.describe('f', 'Load/store transaction state from FILE')
+	.demand(['f'])
+	.argv
+;
+
+var datastore = {};
+
+function write_datastore(callback)
+{
+	fs.writeFile(argv.file, JSON.stringify(datastore), callback);
+}
+
+function list_commands()
+{
+	var s = "txtool command summary:\n";
+	s += "help\tList this command summary\n";
+	s += "init\tInitialize new transaction state database\n";
+	console.log(s);
+}
+
+function main()
+{
+	if (argv._.length == 0) {
+		console.log("No command specified.");
+		list_commands();
+		return;
+	}
+
+	var cmd = argv._[0];
+	
+	if (cmd != "init") {
+		datastore = JSON.parse(fs.readFileSync(argv.file));
+	}
+
+	switch (cmd) {
+	default:
+		console.log("Unknown command", cmd);
+		// fall through
+
+	case "help":
+		list_commands();
+		return;
+	
+	case "init":
+		write_datastore(function(err) {});
+		break;
+	}
+}
+
+main();
+
