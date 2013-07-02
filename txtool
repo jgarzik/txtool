@@ -12,18 +12,74 @@ var argv = require('optimist')
 
 var datastore = {};
 
-function write_datastore(callback)
-{
-	fs.writeFile(argv.file, JSON.stringify(datastore), callback);
-}
-
 function list_commands()
 {
 	var s = "txtool command summary:\n";
 	s += "help\tList this command summary\n";
 	s += "init\tInitialize new transaction state database\n";
+	s += "multisig N-REQUIRED KEY1 KEY2 KEY3...\n\tBegin new multi-sig tx\n";
+	s += "nreq N-REQUIRED\tSpecific number of sigs required for a multisig tx\n";
+	s += "pubkeys KEY1 KEY2 KEY3...\tAdd to list of pubkeys / bitcoin addresses\n";
+	s += "pubkeys.clear\tClear list of pubkeys\n";
 	s += "show\tInspect internal transaction state\n";
 	console.log(s);
+}
+
+function write_datastore(callback)
+{
+	fs.writeFile(argv.file, JSON.stringify(datastore), callback);
+}
+
+function parse_nreq(idx)
+{
+	if (idx >= argv._.length) {
+		throw new Error("N-Required argument missing");
+	}
+
+	var re = /^\d+$/;
+	var arg = argv._[idx];
+	if (!re.test(arg)) {
+		throw new Error("Invalid N-Required argument");
+	}
+
+	var n_req = parseInt(arg, 10);
+	if (n_req < 1 || n_req > 50) {
+		throw new Error("Out of range N-Required arg");
+	}
+
+	datastore['n_required'] = n_req;
+}
+
+function parse_pubkeys(start_idx)
+{
+	// init 'pubkeys'
+	if (datastore['pubkeys'] == undefined) {
+		datastore['pubkeys'] = [];
+	}
+
+	// append to list of pubkeys
+	for (var i = start_idx; i < argv._.length; i++) {
+		datastore['pubkeys'].push(String(argv._[i]));
+	}
+}
+
+function cmd_multisig()
+{
+	parse_nreq(1);
+	parse_pubkeys(2);
+	write_datastore(function(err) {});
+}
+
+function cmd_nreq()
+{
+	parse_nreq(1);
+	write_datastore(function(err) {});
+}
+
+function cmd_pubkeys()
+{
+	parse_pubkeys(1);
+	write_datastore(function(err) {});
 }
 
 function main()
@@ -50,6 +106,23 @@ function main()
 		return;
 	
 	case "init":
+		write_datastore(function(err) {});
+		break;
+
+	case "multisig":
+		cmd_multisig();
+		break;
+	
+	case "nreq":
+		cmd_nreq();
+		break;
+
+	case "pubkeys":
+		cmd_pubkeys();
+		break;
+
+	case "pubkeys.clear":
+		delete datastore['pubkeys'];
 		write_datastore(function(err) {});
 		break;
 
