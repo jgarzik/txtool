@@ -1,5 +1,14 @@
 
-txtool command summary:
+Build bitcoin transactions
+--------------------------
+Usage: txtool [options] COMMAND [command parameters]
+
+Options:
+  -f, --file  Load/store transaction state to/from FILE  [required]
+
+
+txtool command summary
+----------------------
 
 help
 	List this command summary
