@@ -38,6 +38,9 @@ pubkeys.clear
 raw SERIALIZED-TX
 	Input serialized transaction from command line
 
+raw.get TXID
+	RPC: get raw transaction, given hash txid
+
 raw.read FILE
 	Input serialized transaction from file
 
@@ -46,4 +49,8 @@ raw.write FILE
 
 raw.clear
 	Clear serialized tx data
+
+wallet.msig
+	Commit in-memory multisig data to RPC wallet,
+	returning a multisig payment address.
 

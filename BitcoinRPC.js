@@ -73,6 +73,10 @@ function ClassSpec(b) {
     RPC.call(this, 'validateaddress', [address], callback);
   };
 
+  BitcoinRPC.prototype.addMultiSigAddress = function(n_required, keys, callback) {
+    RPC.call(this, 'addmultisigaddress', [n_required, keys], callback);
+  };
+
   BitcoinRPC.prototype.sendToAddress = function(address, amount, callback) {
     RPC.call(this, 'sendtoaddress', [address, amount], callback);
   };

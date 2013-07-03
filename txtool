@@ -31,9 +31,11 @@ function list_commands()
 	s += "pubkeys KEY1 KEY2 KEY3...\n\t\tAdd to list of pubkeys / bitcoin addresses\n";
 	s += "pubkeys.clear\tClear list of pubkeys\n";
 	s += "raw SERIALIZED-TX\n\t\tInput serialized transaction from command line\n";
+	s += "raw.get TXID\tGet raw tx, given hash txid\n";
 	s += "raw.read FILE\tInput serialized transaction from file\n";
 	s += "raw.write FILE\tOutput serialize transaction to file\n";
 	s += "raw.clear\tClear serialized tx data\n";
+	s += "wallet.msig\tCommit in-memory multisig data to RPC wallet,\n\t\treturning a multisig payment address.\n";
 	console.log(s);
 }
 
@@ -125,6 +127,17 @@ function cmd_raw(in_str)
 	write_datastore(function(err) {});
 }
 
+function raw_get_cb(err, resp)
+{
+	if (err) throw err;
+	cmd_raw(resp['result']);
+}
+
+function cmd_raw_get(txid)
+{
+	rpc.getRawTransaction(txid, raw_get_cb);
+}
+
 function raw_read_cb(err, data)
 {
 	if (err) throw err;
@@ -142,6 +155,21 @@ function cmd_raw_write(filename)
 		throw new Error("No raw transaction data stored in memory");
 	
 	fs.writeFile(filename, datastore['raw'], function(err) {});
+}
+
+function wallet_msig_cb(err, resp)
+{
+	if (err) throw err;
+	console.log(resp['result']);
+}
+
+function cmd_wallet_msig()
+{
+	if (!datastore['n_required'] || !datastore['pubkeys'])
+		throw new Error("Missing N-Required and/or pubkeys");
+
+	rpc.addMultiSigAddress(datastore['n_required'], datastore['pubkeys'],
+			       wallet_msig_cb);
 }
 
 function main()
@@ -209,6 +237,11 @@ function main()
 			throw new Error("Missing required hex-string param");
 		cmd_raw(argv._[1]);
 		break;
+	case "raw.get":
+		if (argv._.length < 2)
+			throw new Error("Missing required txid param");
+		cmd_raw_get(argv._[1]);
+		break;
 	case "raw.read":
 		if (argv._.length < 2)
 			throw new Error("Missing required filename param");
@@ -222,6 +255,9 @@ function main()
 	case "raw.clear":
 		delete datastore['raw'];
 		write_datastore(function(err) {});
+		break;
+	case "wallet.msig":
+		cmd_wallet_msig();
 		break;
 	}
 }
