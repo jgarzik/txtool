@@ -7,6 +7,20 @@ Options:
   -f, --file  Load/store transaction state to/from FILE  [required]
 
 
+Theory of operation
+-------------------
+All operation revolves around an internal database, which is modified
+via execution of a command operation:
+	1. txtool reads transaction state file (JSON).
+	2. txtool executes command given on command line,
+	   updating transaction state.
+	3. txtool writes transaction state file, overwriting
+	   previous version.
+
+"transaction state" is anything involving the given transaction being
+built, examined or modified.
+
+
 txtool command summary
 ----------------------
 
@@ -51,6 +65,6 @@ raw.clear
 	Clear serialized tx data
 
 wallet.msig
-	Commit in-memory multisig data to RPC wallet,
+	Commit in-memory multisig data (N-Required, Keys) to RPC wallet,
 	returning a multisig payment address.
 
