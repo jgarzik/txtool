@@ -50,7 +50,12 @@ function list_commands()
 
 function write_datastore(callback)
 {
-	fs.writeFile(statedb_fn, JSON.stringify(datastore), callback);
+	var tmp_fn = statedb_fn + ".tmp";
+
+	fs.writeFile(tmp_fn, JSON.stringify(datastore), function(err) {
+		if (err) throw err;
+		fs.rename(tmp_fn, statedb_fn, callback);
+	});
 }
 
 function parse_nreq(idx)
