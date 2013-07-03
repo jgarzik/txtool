@@ -92,3 +92,10 @@ wallet.msig
 	Commit in-memory multisig data (N-Required, Keys) to RPC wallet,
 	returning a multisig payment address.
 
+
+Encryption (walletpassphrase) note
+----------------------------------
+The user is expected to authenticate with bitcoind RPC prior to using
+this tool, if this tool will require access to private keys for the
+operation (e.g. signing).
+
