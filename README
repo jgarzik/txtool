@@ -28,13 +28,13 @@ txtool command summary
 ----------------------
 
 dump
-	Inspect internal transaction state
+	Inspect transaction state database.
 
 help
-	List this command summary
+	List this command summary.
 
 init
-	Initialize new transaction state database
+	Initialize new transaction state database.
 
 inputs TXID1 VOUT1 TXID2 VOUT2...
 	Raw transaction building.  Append to list of TX inputs.
@@ -46,7 +46,7 @@ multisig N-REQUIRED KEY1 KEY2 KEY3...
 	Begin new multi-sig tx
 
 nreq N-REQUIRED
-	Specific number of sigs required for a multisig tx
+	Specify number of sigs required for a multisig tx
 
 outputs ADDRESS1 VALUE1 ADDRESS2 VALUE2...
 	Raw transaction building.  Append to list of TX outputs.
@@ -56,37 +56,40 @@ outputs.clear
 
 pubkey.get ADDRESS
 
-	RPC: Obtain full pubkey, given bitcoin address (pubkey hash)
+	RPC: Obtain full pubkey, given bitcoin address (pubkey hash),
+	from bitcoind wallet.
 
 pubkeys KEY1 KEY2 KEY3...
-	Add to list of pubkeys / bitcoin addresses
+	Append to list of pubkeys / bitcoin addresses
 
 pubkeys.clear
-	Clear list of pubkeys
+	Clear list of pubkeys.
 
 raw SERIALIZED-TX
 	Input serialized transaction from command line
 
 raw.clear
-	Clear serialized tx data
+	Clear serialized tx data.
 
 raw.create
 	RPC: create raw transaction, given inputs and outputs.
 
 raw.get TXID
-	RPC: get raw transaction, given hash txid
+	RPC: get raw transaction, given hash txid.
 
 raw.read FILE
-	Input serialized transaction from file
+	Input serialized transaction from file.
 
 raw.write FILE
-	Output serialize transaction to file
+	Output serialized transaction to file.
 
 raw.sign
-	RPC: sign raw transaction, if possible
+	RPC: sign raw transaction, if possible.
+	Uses keys in bitcoind's wallet.
 
 raw.send
-	RPC: broadcast raw transaction to network
+	RPC: broadcast raw transaction to network,
+	returning a transaction id.
 
 wallet.msig
 	Commit in-memory multisig data (N-Required, Keys) to RPC wallet,
