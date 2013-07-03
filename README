@@ -10,6 +10,9 @@ Options:
 txtool command summary
 ----------------------
 
+dump
+	Inspect internal transaction state
+
 help
 	List this command summary
 
@@ -39,7 +42,4 @@ raw.write FILE
 
 raw.clear
 	Clear serialized tx data
-
-show
-	Inspect internal transaction state
 
