@@ -1,0 +1,18 @@
+
+txtool may be used to pass around and sign incomplete (not yet fully
+signed) transactions.
+
+In this example, someone has emailed the raw hex data for a bitcoin
+transaction, UNSIGNED.TXT.  The user signs the transaction, and then
+emails SIGNED.TXT to another party.
+
+$ ./txtool -f state.json init
+$ ./txtool -f state.json raw.read UNSIGNED.TXT
+$ ./txtool -f state.json raw.sign
+$ ./txtool -f state.json raw.write SIGNED.TXT
+
+Additionally, if the transaction is complete -- raw.sign reports
+"sigs:complete" -- then the transaction may be broadcast on the network.
+
+$ ./txtool -f state.json raw.send
+
