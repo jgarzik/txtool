@@ -9,8 +9,6 @@ dumping a lot of information that may obscure one useful nugget.
 At a minimum, someone should confirm that txtool exit status is zero
 normally, but non-zero when an exception is thrown.
 
-Bugs: RPC errors cannot be passed directly to throw.
-
 With all parameters optional, optimist module does not appear to
 provide a way to service "--help" style requests.
 

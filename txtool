@@ -3,6 +3,7 @@
 // Copyright 2013 BitPay, Inc.
 
 var fs = require('fs');
+var util = require('util');
 var BitcoinRPC = require('./BitcoinRPC').class();
 var rpc = new BitcoinRPC({
 		'port' : 18332,
@@ -39,6 +40,7 @@ function list_commands()
 	s += "raw SERIALIZED-TX\n\t\tInput serialized transaction from command line\n";
 	s += "raw.clear\tClear serialized tx data\n";
 	s += "raw.create\n";
+	s += "raw.decode\tDecode raw tx, to JSON object\n";
 	s += "raw.get TXID\tGet raw tx, given hash txid\n";
 	s += "raw.read FILE\tInput serialized transaction from file\n";
 	s += "raw.send\n";
@@ -108,7 +110,7 @@ function cmd_nreq()
 
 function pubkey_get_cb(err, resp)
 {
-	if (err) throw err;
+	if (err) throw new Error(err['message']);
 	if (!resp['result']['pubkey'])
 		throw new Error("Unable to obtain pubkey from RPC wallet");
 
@@ -180,7 +182,7 @@ function cmd_raw(in_str)
 
 function raw_create_cb(err, resp)
 {
-	if (err) throw err;
+	if (err) throw new Error(err['message']);
 	cmd_raw(resp['result']);
 }
 
@@ -193,9 +195,23 @@ function cmd_raw_create()
 				 raw_create_cb);
 }
 
+function raw_decode_cb(err, resp)
+{
+	if (err) throw new Error(err['message']);
+	console.log(util.inspect(resp['result'], {'depth':1000}));
+}
+
+function cmd_raw_decode()
+{
+	if (!datastore['raw'])
+		throw new Error("Missing raw transaction");
+
+	rpc.decodeRawTransaction(datastore['raw'], raw_decode_cb);
+}
+
 function raw_get_cb(err, resp)
 {
-	if (err) throw err;
+	if (err) throw new Error(err['message']);
 	cmd_raw(resp['result']);
 }
 
@@ -217,7 +233,7 @@ function cmd_raw_read(filename)
 
 function raw_send_cb(err, resp)
 {
-	if (err) throw err;
+	if (err) throw new Error(err['message']);
 	console.log(resp['result']);
 }
 
@@ -231,7 +247,7 @@ function cmd_raw_send()
 
 function raw_sign_cb(err, resp)
 {
-	if (err) throw err;
+	if (err) throw new Error(err['message']);
 	var result = resp['result'];
 	var hexstr = result['hex'];
 	var complete = result['complete'];
@@ -264,7 +280,7 @@ function cmd_raw_write(filename)
 
 function wallet_msig_cb(err, resp)
 {
-	if (err) throw err;
+	if (err) throw new Error(err['message']);
 	console.log(resp['result']);
 }
 
@@ -364,6 +380,9 @@ function main()
 		break;
 	case "raw.create":
 		cmd_raw_create();
+		break;
+	case "raw.decode":
+		cmd_raw_decode();
 		break;
 	case "raw.get":
 		if (argv._.length < 2)

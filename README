@@ -74,6 +74,9 @@ raw.clear
 raw.create
 	RPC: create raw transaction, given inputs and outputs.
 
+raw.decode
+	RPC: decode raw transaction to readable JSON object.
+
 raw.get TXID
 	RPC: get raw transaction, given hash txid.
 

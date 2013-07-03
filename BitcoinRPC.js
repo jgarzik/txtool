@@ -76,6 +76,10 @@ function ClassSpec(b) {
     RPC.call(this, 'sendrawtransaction',  [hexstr], callback);
   };
 
+  BitcoinRPC.prototype.decodeRawTransaction = function(hexstr, callback) {
+    RPC.call(this, 'decoderawtransaction',  [hexstr], callback);
+  };
+
   BitcoinRPC.prototype.validateAddress = function(address, callback) {
     RPC.call(this, 'validateaddress', [address], callback);
   };
