@@ -79,7 +79,10 @@ function parse_pubkeys(start_idx)
 function cmd_multisig()
 {
 	parse_nreq(1);
+
+	datastore['pubkeys'] = [];	// clear, if not already
 	parse_pubkeys(2);
+
 	write_datastore(function(err) {});
 }
 
