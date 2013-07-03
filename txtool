@@ -1,6 +1,13 @@
 #!/usr/bin/env node
 
 var fs = require('fs');
+var BitcoinRPC = require('./BitcoinRPC').class();
+var rpc = new BitcoinRPC({
+		'port' : 18332,
+		'user' : 'user',
+		'pass' : 'pass',
+		'protocol' : 'http'
+});
 
 var argv = require('optimist')
 	.usage('Build bitcoin transactions\nUsage: $0 [options] COMMAND [command parameters]')
@@ -20,6 +27,7 @@ function list_commands()
 	s += "init\t\tInitialize new transaction state database\n";
 	s += "multisig N-REQUIRED KEY1 KEY2 KEY3...\n\t\tBegin new multi-sig tx\n";
 	s += "nreq N-REQUIRED\tSpecific number of sigs required for a multisig tx\n";
+	s += "pubkey.get ADDRESS\n\t\tRPC: Lookup pubkey, given bitcoin address\n";
 	s += "pubkeys KEY1 KEY2 KEY3...\n\t\tAdd to list of pubkeys / bitcoin addresses\n";
 	s += "pubkeys.clear\tClear list of pubkeys\n";
 	s += "raw SERIALIZED-TX\n\t\tInput serialized transaction from command line\n";
@@ -57,9 +65,8 @@ function parse_nreq(idx)
 function parse_pubkeys(start_idx)
 {
 	// init 'pubkeys'
-	if (datastore['pubkeys'] == undefined) {
+	if (datastore['pubkeys'] == undefined)
 		datastore['pubkeys'] = [];
-	}
 
 	// append to list of pubkeys
 	for (var i = start_idx; i < argv._.length; i++) {
@@ -78,6 +85,24 @@ function cmd_nreq()
 {
 	parse_nreq(1);
 	write_datastore(function(err) {});
+}
+
+function pubkey_get_cb(err, resp)
+{
+	if (err) throw err;
+	if (!resp['result']['pubkey'])
+		throw new Error("Unable to obtain pubkey from RPC wallet");
+
+	if (datastore['pubkeys'] == undefined)
+		datastore['pubkeys'] = [];
+
+	datastore['pubkeys'].push(String(resp['result']['pubkey']));
+	write_datastore(function(err) {});
+}
+
+function cmd_pubkey_get(address)
+{
+	rpc.validateAddress(address, pubkey_get_cb);
 }
 
 function cmd_pubkeys()
@@ -162,6 +187,12 @@ function main()
 	
 	case "nreq":
 		cmd_nreq();
+		break;
+
+	case "pubkey.get":
+		if (argv._.length < 2)
+			throw new Error("Missing required address param");
+		cmd_pubkey_get(argv._[1]);
 		break;
 
 	case "pubkeys":

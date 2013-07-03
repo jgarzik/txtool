@@ -25,6 +25,10 @@ multisig N-REQUIRED KEY1 KEY2 KEY3...
 nreq N-REQUIRED
 	Specific number of sigs required for a multisig tx
 
+pubkey.get ADDRESS
+
+	RPC: Obtain full pubkey, given bitcoin address (pubkey hash)
+
 pubkeys KEY1 KEY2 KEY3...
 	Add to list of pubkeys / bitcoin addresses
 
