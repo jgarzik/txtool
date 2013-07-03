@@ -15,6 +15,7 @@ var datastore = {};
 function list_commands()
 {
 	var s = "txtool command summary:\n";
+	s += "dump\t\tInspect internal transaction state\n";
 	s += "help\t\tList this command summary\n";
 	s += "init\t\tInitialize new transaction state database\n";
 	s += "multisig N-REQUIRED KEY1 KEY2 KEY3...\n\t\tBegin new multi-sig tx\n";
@@ -25,7 +26,6 @@ function list_commands()
 	s += "raw.read FILE\tInput serialized transaction from file\n";
 	s += "raw.write FILE\tOutput serialize transaction to file\n";
 	s += "raw.clear\tClear serialized tx data\n";
-	s += "show\t\tInspect internal transaction state\n";
 	console.log(s);
 }
 
@@ -139,6 +139,11 @@ function main()
 	}
 
 	switch (cmd) {
+
+	case "dump":
+		console.dir(datastore);
+		break;
+
 	default:
 		console.error("Unknown command", cmd);
 		// fall through
@@ -186,10 +191,6 @@ function main()
 	case "raw.clear":
 		delete datastore['raw'];
 		write_datastore(function(err) {});
-		break;
-
-	case "show":
-		console.dir(datastore);
 		break;
 	}
 }
