@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-# MIT/X11-like license.  See LICENSE.txt.
-# Copyright 2013 BitPay, Inc.
+// MIT/X11-like license.  See LICENSE.txt.
+// Copyright 2013 BitPay, Inc.
 
 var fs = require('fs');
 var BitcoinRPC = require('./BitcoinRPC').class();
@@ -15,9 +15,9 @@ var argv = require('optimist')
 	.usage('Build bitcoin transactions\nUsage: $0 [options] COMMAND [command parameters]')
 	.alias('f', 'file')
 	.describe('f', 'Load/store transaction state to/from JSON file')
-	.demand(['f'])
 	.argv
 ;
+var statedb_fn = argv.file ? argv.file : 'txstatedb.json';
 
 var datastore = {};
 
@@ -50,7 +50,7 @@ function list_commands()
 
 function write_datastore(callback)
 {
-	fs.writeFile(argv.file, JSON.stringify(datastore), callback);
+	fs.writeFile(statedb_fn, JSON.stringify(datastore), callback);
 }
 
 function parse_nreq(idx)
@@ -284,9 +284,9 @@ function main()
 	
 	if (cmd != 'init' && cmd != 'help') {
 		try {
-			datastore = JSON.parse(fs.readFileSync(argv.file));
+			datastore = JSON.parse(fs.readFileSync(statedb_fn));
 		} catch(e) {
-			console.error(argv.file, "must be a valid JSON file.  Run 'init' command to create a new one.");
+			console.error(statedb_fn, "must be a valid JSON file.  Run 'init' command to create a new one.");
 			return;
 		}
 	}

@@ -4,14 +4,14 @@ Build bitcoin transactions
 Usage: txtool [options] COMMAND [command parameters]
 
 Options:
-  -f, --file  Load/store transaction state to/from FILE  [required]
+  -f, --file  Load/store transaction state to/from FILE
 
 
 Theory of operation
 -------------------
 All operation revolves around an internal database, which is modified
 via execution of a command operation:
-	1. txtool reads transaction state file (JSON).
+	1. txtool reads transaction state file (JSON). Default "txstatedb.json".
 	2. txtool executes command given on command line,
 	   updating transaction state.
 	3. txtool writes transaction state file, overwriting

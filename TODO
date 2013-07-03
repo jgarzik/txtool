@@ -1,14 +1,18 @@
 
 BIP 10 support
 
-Decode and display transaction, in a way that assists human verification
-of what they are signing.  MITM mitigation.
+Decode and display transaction, in a way that assists human
+verification of what they are signing.  MITM mitigation.
 
 Errors are thrown via js exception.  This may be considered ugly,
-dumping a lot of information that may obscure one useful nugget.  At a
-minimum, someone should confirm that txtool exit status is zero
+dumping a lot of information that may obscure one useful nugget.
+At a minimum, someone should confirm that txtool exit status is zero
 normally, but non-zero when an exception is thrown.
 
 Bugs: RPC errors cannot be passed directly to throw.
 
+With all parameters optional, optimist module does not appear to
+provide a way to service "--help" style requests.
+
+"clean" command, to remove state database?
 

@@ -3,7 +3,7 @@ Example: 2-of-3 multisig (2 signatures required, 3 public keys)
 
 1) Initialize db.
 
-$ ./txtool -f state.json init
+$ ./txtool init
 
 2) Obtain three bitcoin addresses,
 	mxDoMG9BogJ6kmgiTJNxhaAUUh11j3HWHr
@@ -13,12 +13,12 @@ $ ./txtool -f state.json init
 3) Communicate with the local bitcoind associated with each
    address, and obtain the full public keys:
 
-$ ./txtool -f state.json pubkey.get mxDoMG9BogJ6kmgiTJNxhaAUUh11j3HWHr
-$ ./txtool -f state.json pubkey.get myGFNvUkRL3DTWHgKvuv29JW1TkcaihsSN
-$ ./txtool -f state.json pubkey.get mr3q8AeyLX53h9JctDAbVfWDYkiW52PRSP
+$ ./txtool pubkey.get mxDoMG9BogJ6kmgiTJNxhaAUUh11j3HWHr
+$ ./txtool pubkey.get myGFNvUkRL3DTWHgKvuv29JW1TkcaihsSN
+$ ./txtool pubkey.get mr3q8AeyLX53h9JctDAbVfWDYkiW52PRSP
 
 And we see the database has been updated with our three public keys:
-$ ./txtool -f state.json dump
+$ ./txtool dump
 { pubkeys: 
    [ '02affe9b8160e2d2b492389501407355cc19603ed99bbe542a6799447ea735b453',
      '02c2f5e2c376d0e0963f0a3a798877788f94c440f621a6493582b63f08bb55d1da',
@@ -26,11 +26,11 @@ $ ./txtool -f state.json dump
 
 4) Set number of signatures required.
 
-$ ./txtool -f state.json nreq 2
+$ ./txtool nreq 2
 
 5) Use this data to add a multisig payment address to bitcoind's wallet.
 
-$ ./txtool -f state.json wallet.msig
+$ ./txtool wallet.msig
 2MsfxrcnDNF1kHJRxXT11TnAgDvVHkEvzSd
 
 6) Send bitcoins to the multisig address.
@@ -46,21 +46,21 @@ $ ./bitcoind -testnet getrawtransaction ad39b5d53230af4784fb46720e5bc474f16a97a2
 
 8) Create inputs for the spend-bitcoins transactions.
 
-$ ./txtool -f state.json inputs ad39b5d53230af4784fb46720e5bc474f16a97a2fc6e85eed5fd3ef423e97885 0
+$ ./txtool inputs ad39b5d53230af4784fb46720e5bc474f16a97a2fc6e85eed5fd3ef423e97885 0
 
 9) Create outputs for the spend-bitcoins transactions.
 mftotywBYNSHjYCL1x4XWTkoac3t71UYL1 is the recipient in this example.
 
-$ ./txtool -f state.json outputs mftotywBYNSHjYCL1x4XWTkoac3t71UYL1 1.5
+$ ./txtool outputs mftotywBYNSHjYCL1x4XWTkoac3t71UYL1 1.5
 
 10) Serialize the inputs and outputs into a raw transaction.
 
-$ ./txtool -f state.json raw.create
+$ ./txtool raw.create
 
 Inspecting the database demonstrates the fruit of all our labors:
 "raw" contains the serialized, unsigned transaction.
 
-$ ./txtool -f state.json dump
+$ ./txtool dump
 { pubkeys: 
    [ '02affe9b8160e2d2b492389501407355cc19603ed99bbe542a6799447ea735b453',
      '02c2f5e2c376d0e0963f0a3a798877788f94c440f621a6493582b63f08bb55d1da',
@@ -74,7 +74,7 @@ $ ./txtool -f state.json dump
 
 11) Sign the raw transaction.
 
-$ ./txtool -f state.json raw.sign
+$ ./txtool raw.sign
 sigs:complete
 raw:updated
 
@@ -85,6 +85,6 @@ signed raw transactions among multiple parties.
 
 12) Broadcast the signed transaction to the network
 
-$ ./txtool -f state.json raw.send
+$ ./txtool raw.send
 ca02bc7bdaf8a79b150e825e3d528620092ed42d68d649738381102aa1f0d9fe
 

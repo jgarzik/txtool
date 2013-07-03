@@ -1,6 +1,6 @@
-# BitcoinRPC.js
-# MIT/X11-like license.  See LICENSE.txt.
-# Copyright 2013 BitPay, Inc.
+// BitcoinRPC.js
+// MIT/X11-like license.  See LICENSE.txt.
+// Copyright 2013 BitPay, Inc.
 require('classtool');
 
 function ClassSpec(b) {
