@@ -20,6 +20,9 @@ via execution of a command operation:
 "transaction state" is anything involving the given transaction being
 built, examined or modified.
 
+A session begins when a new database is initialized, using the "init"
+command.
+
 
 txtool command summary
 ----------------------
