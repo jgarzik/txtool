@@ -57,6 +57,10 @@ function ClassSpec(b) {
     RPC.call(this, 'gettransaction',  [txid], callback);
   };
 
+  BitcoinRPC.prototype.createRawTransaction = function(inputs, outputs, callback) {
+    RPC.call(this, 'createrawtransaction',  [inputs, outputs], callback);
+  };
+
   BitcoinRPC.prototype.getRawTransaction = function(txid, callback) {
     RPC.call(this, 'getrawtransaction',  [txid], callback);
   };

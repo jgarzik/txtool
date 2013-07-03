@@ -36,11 +36,23 @@ help
 init
 	Initialize new transaction state database
 
+inputs TXID1 VOUT1 TXID2 VOUT2...
+	Raw transaction building.  Append to list of TX inputs.
+
+inputs.clear
+	Clear list of TX inputs.
+
 multisig N-REQUIRED KEY1 KEY2 KEY3...
 	Begin new multi-sig tx
 
 nreq N-REQUIRED
 	Specific number of sigs required for a multisig tx
+
+outputs ADDRESS1 VALUE1 ADDRESS2 VALUE2...
+	Raw transaction building.  Append to list of TX outputs.
+
+outputs.clear
+	Clear list of TX outputs.
 
 pubkey.get ADDRESS
 
@@ -55,6 +67,12 @@ pubkeys.clear
 raw SERIALIZED-TX
 	Input serialized transaction from command line
 
+raw.clear
+	Clear serialized tx data
+
+raw.create
+	RPC: create raw transaction, given inputs and outputs.
+
 raw.get TXID
 	RPC: get raw transaction, given hash txid
 
@@ -64,8 +82,11 @@ raw.read FILE
 raw.write FILE
 	Output serialize transaction to file
 
-raw.clear
-	Clear serialized tx data
+raw.sign
+	RPC: sign raw transaction, if possible
+
+raw.send
+	RPC: broadcast raw transaction to network
 
 wallet.msig
 	Commit in-memory multisig data (N-Required, Keys) to RPC wallet,
