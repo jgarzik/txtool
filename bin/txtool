@@ -38,13 +38,14 @@ function list_commands()
 	s += "pubkeys KEY1 KEY2 KEY3...\n\t\tAdd to list of pubkeys / bitcoin addresses\n";
 	s += "pubkeys.clear\tClear list of pubkeys\n";
 	s += "raw SERIALIZED-TX\n\t\tInput serialized transaction from command line\n";
+	s += "raw.append FILE\tAppend FILE to serialized transaction data\n";
 	s += "raw.clear\tClear serialized tx data\n";
 	s += "raw.create\n";
 	s += "raw.decode\tDecode raw tx, to JSON object\n";
 	s += "raw.get TXID\tGet raw tx, given hash txid\n";
 	s += "raw.read FILE\tInput serialized transaction from file\n";
 	s += "raw.send\n";
-	s += "raw.sign\n";
+	s += "raw.sign [anyonecanpay]\n";
 	s += "raw.write FILE\tOutput serialize transaction to file\n";
 	s += "wallet.msig\tCommit in-memory multisig data to RPC wallet,\n\t\treturning a multisig payment address.\n";
 	console.log(s);
@@ -166,7 +167,7 @@ function cmd_outputs()
 	write_datastore(function(err) {});
 }
 
-function cmd_raw(in_str)
+function cmd_raw(in_str, append)
 {
 	var re = new RegExp('([\\da-fA-F]+)');
 	in_str = String(in_str);
@@ -175,7 +176,10 @@ function cmd_raw(in_str)
 		throw new Error("Hex transaction data not supplied");
 
 	var hexstr = matches[1];
-	datastore['raw'] = hexstr;
+	if (append && datastore['raw'])
+		datastore['raw'] += hexstr;
+	else
+		datastore['raw'] = hexstr;
 
 	write_datastore(function(err) {});
 }
@@ -183,7 +187,7 @@ function cmd_raw(in_str)
 function raw_create_cb(err, resp)
 {
 	if (err) throw new Error(err['message']);
-	cmd_raw(resp['result']);
+	cmd_raw(resp['result'], false);
 }
 
 function cmd_raw_create()
@@ -212,7 +216,7 @@ function cmd_raw_decode()
 function raw_get_cb(err, resp)
 {
 	if (err) throw new Error(err['message']);
-	cmd_raw(resp['result']);
+	cmd_raw(resp['result'], false);
 }
 
 function cmd_raw_get(txid)
@@ -220,10 +224,21 @@ function cmd_raw_get(txid)
 	rpc.getRawTransaction(txid, raw_get_cb);
 }
 
+function raw_append_cb(err, data)
+{
+	if (err) throw err;
+	cmd_raw(data, true);
+}
+
+function cmd_raw_append(filename)
+{
+	fs.readFile(filename, {'encoding':'utf8'}, raw_append_cb);
+}
+
 function raw_read_cb(err, data)
 {
 	if (err) throw err;
-	cmd_raw(data);
+	cmd_raw(data, false);
 }
 
 function cmd_raw_read(filename)
@@ -262,12 +277,28 @@ function raw_sign_cb(err, resp)
 		console.log("raw:unchanged");
 }
 
-function cmd_raw_sign()
+function cmd_raw_sign(start_idx)
 {
 	if (!datastore['raw'])
 		throw new Error("Missing raw transaction");
 
-	rpc.signRawTransaction(datastore['raw'], raw_sign_cb);
+	var anypay = false;
+
+	// scan list of command line options
+	for (var i = start_idx; i < argv._.length; i++) {
+		switch (argv._[i]) {
+		case "anyonecanpay":
+			anypay = true;
+			break;
+
+		default:
+			throw new Error("Unknown raw.sign option");
+		}
+	}
+
+	rpc.signRawTransaction(datastore['raw'], null, null,
+			       anypay ? 'ALL|ANYONECANPAY' : 'ALL',
+			       raw_sign_cb);
 }
 
 function cmd_raw_write(filename)
@@ -372,7 +403,12 @@ function main()
 	case "raw":
 		if (argv._.length < 2)
 			throw new Error("Missing required hex-string param");
-		cmd_raw(argv._[1]);
+		cmd_raw(argv._[1], false);
+		break;
+	case "raw.append":
+		if (argv._.length < 2)
+			throw new Error("Missing required filename param");
+		cmd_raw_append(argv._[1]);
 		break;
 	case "raw.clear":
 		delete datastore['raw'];
@@ -398,7 +434,7 @@ function main()
 		cmd_raw_send();
 		break;
 	case "raw.sign":
-		cmd_raw_sign();
+		cmd_raw_sign(1);
 		break;
 	case "raw.write":
 		if (argv._.length < 2)

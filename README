@@ -68,6 +68,9 @@ pubkeys.clear
 raw SERIALIZED-TX
 	Input serialized transaction from command line
 
+raw.append FILE
+	Append FILE to in-memory serialized transaction data.
+
 raw.clear
 	Clear serialized tx data.
 
@@ -86,9 +89,12 @@ raw.read FILE
 raw.write FILE
 	Output serialized transaction to file.
 
-raw.sign
+raw.sign [anyonecanpay]
 	RPC: sign raw transaction, if possible.
 	Uses keys in bitcoind's wallet.
+
+	If the optional argument "anyonecanpay" is supplied,
+	outputs are locked, but third party inputs may change.
 
 raw.send
 	RPC: broadcast raw transaction to network,
