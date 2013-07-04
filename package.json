@@ -28,6 +28,13 @@
     "url": "http://github.com/gasteve/txtool.git"
   },
   "scripts": {},
+  "engines": {
+    "node": ">=0.8"
+  },
+  "dependencies": {
+    "libbitcoin": ">=0.1.0",
+    "classtool": ">=1.0.0"
+  },
   "devDependencies": {},
   "license": "MIT"
 }
