@@ -68,8 +68,10 @@ function ClassSpec(b) {
     RPC.call(this, 'getrawtransaction',  [txid], callback);
   };
 
-  BitcoinRPC.prototype.signRawTransaction = function(hexstr, callback) {
-    RPC.call(this, 'signrawtransaction',  [hexstr], callback);
+  BitcoinRPC.prototype.signRawTransaction = function(hexstr, prevouts,
+  						     privkeys, sighash,
+						     callback) {
+    RPC.call(this, 'signrawtransaction', [hexstr, prevouts, privkeys, sighash], callback);
   };
 
   BitcoinRPC.prototype.sendRawTransaction = function(hexstr, callback) {
