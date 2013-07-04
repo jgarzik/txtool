@@ -5,7 +5,7 @@ Actors receiving payment:
 	CEO, n1TxmrVKKrLtKG4zJjx7T9pcCDWkyPBuiD, 1.9
 	Agent/broker, mjTxHn6peP9vzePUrTaEyPkVn2FVCEtau2, 0.1
 
-Contributor #1 donates 1.0:
+Contributor #1 donates 1.0 to an "anyone can pay" transaction:
 $ ./txtool -f cf1.json init
 $ ./txtool -f cf1.json inputs 6b1ffae3a9198eac6571ffa614ce62621fd5f53cff36d48fba4ba8b550687fbc 0
 $ ./txtool -f cf1.json outputs n1TxmrVKKrLtKG4zJjx7T9pcCDWkyPBuiD 1.9 mjTxHn6peP9vzePUrTaEyPkVn2FVCEtau2 0.1
@@ -15,7 +15,7 @@ sigs:complete
 raw:updated
 $ ./txtool -f cf1.json raw.write cf1-tx.txt
 
-Contributor #2 donates 1.0:
+Contributor #2 donates 1.0 to an "anyone can pay" transaction:
 $ ./txtool -f cf2.json init
 $ ./txtool -f cf2.json inputs 6b1ffae3a9198eac6571ffa614ce62621fd5f53cff36d48fba4ba8b550687fbc 1
 $ ./txtool -f cf2.json outputs n1TxmrVKKrLtKG4zJjx7T9pcCDWkyPBuiD 1.9 mjTxHn6peP9vzePUrTaEyPkVn2FVCEtau2 0.1
@@ -24,4 +24,11 @@ $ ./txtool -f cf2.json raw.sign anyonecanpay
 sigs:complete
 raw:updated
 $ ./txtool -f cf2.json raw.write cf2-tx.txt
+
+At this point, two individuals (cf1-tx.txt, cf2-tx.txt) each have a
+signed transaction with 1.0 input and 2.0 output -- an invalid
+transaction.  We must merge these transactions together into a single
+transaction with 2.0 input and 2.0 output.
+
+TODO: Update txtool to merge transactions together.
 
