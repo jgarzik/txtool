@@ -1,0 +1,33 @@
+{
+  "name": "txtool",
+  "description": "Bitcoin Transaction Tool",
+  "version": "0.1.0",
+  "author": {
+    "name": "Jeff Garzik",
+    "email": "jgarzik@bitpay.com"
+  },
+  "contributors": [
+    {
+      "name": "Stephen Pair",
+      "email": "stephen@bitpay.com"
+    }
+  ],
+  "main": "./index",
+  "keywords": [
+    "bitcoin",
+    "btc",
+    "satoshi",
+    "money",
+    "currency",
+    "virtual",
+    "transactions",
+    "multisig"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/gasteve/txtool.git"
+  },
+  "scripts": {},
+  "devDependencies": {},
+  "license": "MIT"
+}
