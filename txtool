@@ -4,7 +4,7 @@
 
 var fs = require('fs');
 var util = require('util');
-var BitcoinRPC = require('./BitcoinRPC').class();
+var BitcoinRPC = require('libbitcoin/BitcoinRPC').class();
 var rpc = new BitcoinRPC({
 		'port' : 18332,
 		'user' : 'user',
