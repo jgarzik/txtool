@@ -13,6 +13,9 @@
     }
   ],
   "main": "./index",
+  "bin": {
+    "txtool": "./bin/txtool"
+  },
   "keywords": [
     "bitcoin",
     "btc",
