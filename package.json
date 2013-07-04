@@ -1,7 +1,7 @@
 {
   "name": "txtool",
   "description": "Bitcoin Transaction Tool",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "Jeff Garzik",
     "email": "jgarzik@bitpay.com"
@@ -36,7 +36,8 @@
   },
   "dependencies": {
     "classtool": ">=1.0.0",
-    "optimist": ">=0.6.0"
+    "optimist": ">=0.6.0",
+    "libcoin": ">=0.1.0"
   },
   "devDependencies": {},
   "license": "MIT"
