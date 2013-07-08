@@ -24,6 +24,15 @@ A session begins when a new database is initialized, using the "init"
 command.
 
 
+Dependencies
+------------
+node.js			-- http://nodejs.org/
+
+node modules ("npm install $module_name"):
+	optimist
+	libcoin		-- https://github.com/gasteve/node-libcoin
+
+
 txtool command summary
 ----------------------
 
