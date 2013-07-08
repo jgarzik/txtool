@@ -12,5 +12,3 @@ normally, but non-zero when an exception is thrown.
 With all parameters optional, optimist module does not appear to
 provide a way to service "--help" style requests.
 
-"clean" command, to remove state database?
-
