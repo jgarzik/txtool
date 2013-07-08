@@ -25,6 +25,7 @@ var datastore = {};
 function list_commands()
 {
 	var s = "txtool command summary:\n";
+	s += "clean\t\tRemove transaction state database\n";
 	s += "dump\t\tInspect internal transaction state\n";
 	s += "help\t\tList this command summary\n";
 	s += "init\t\tInitialize new transaction state database\n";
@@ -49,6 +50,17 @@ function list_commands()
 	s += "raw.write FILE\tOutput serialize transaction to file\n";
 	s += "wallet.msig\tCommit in-memory multisig data to RPC wallet,\n\t\treturning a multisig payment address.\n";
 	console.log(s);
+}
+
+function remove_database(callback)
+{
+	fs.exists(statedb_fn, function(exists) {
+		if (exists)
+			fs.unlink(statedb_fn, function(err) {
+				if (err) throw err;
+				callback();
+			});
+	});
 }
 
 function write_datastore(callback)
@@ -334,7 +346,7 @@ function main()
 
 	var cmd = argv._[0];
 	
-	if (cmd != 'init' && cmd != 'help') {
+	if (cmd != 'init' && cmd != 'help' && cmd != 'clean') {
 		try {
 			datastore = JSON.parse(fs.readFileSync(statedb_fn));
 		} catch(e) {
@@ -344,6 +356,10 @@ function main()
 	}
 
 	switch (cmd) {
+
+	case "clean":
+		remove_database(function(err) {});
+		break;
 
 	case "dump":
 		console.dir(datastore);

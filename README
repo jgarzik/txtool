@@ -27,6 +27,10 @@ command.
 txtool command summary
 ----------------------
 
+clean
+	Remove transaction state database, and any associated
+	temporary files.
+
 dump
 	Inspect transaction state database.
 
