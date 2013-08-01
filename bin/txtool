@@ -4,7 +4,9 @@
 
 var fs = require('fs');
 var util = require('util');
+var program = require('commander');
 var BitcoinRPC = require('libcoin/RpcClient').class();
+var TXTOOL_VERSION = '0.2';
 var rpc = new BitcoinRPC({
 		'port' : 18332,
 		'user' : 'user',
@@ -12,13 +14,12 @@ var rpc = new BitcoinRPC({
 		'protocol' : 'http'
 });
 
-var argv = require('optimist')
-	.usage('Build bitcoin transactions\nUsage: $0 [options] COMMAND [command parameters]')
-	.alias('f', 'file')
-	.describe('f', 'Load/store transaction state to/from JSON file')
-	.argv
-;
-var statedb_fn = argv.file ? argv.file : 'txstatedb.json';
+program
+	.version(TXTOOL_VERSION)
+	.option('-f, --file [file]', 'Load/store transaction state to/from JSON file [txstatedb.json]', 'txstatedb.json')
+	.parse(process.argv);
+
+var statedb_fn = program.file;
 
 var datastore = {};
 
@@ -75,12 +76,12 @@ function write_datastore(callback)
 
 function parse_nreq(idx)
 {
-	if (idx >= argv._.length) {
+	if (idx >= program.args.length) {
 		throw new Error("N-Required argument missing");
 	}
 
 	var re = /^\d+$/;
-	var arg = argv._[idx];
+	var arg = program.args[idx];
 	if (!re.test(arg)) {
 		throw new Error("Invalid N-Required argument");
 	}
@@ -100,8 +101,8 @@ function parse_pubkeys(start_idx)
 		datastore['pubkeys'] = [];
 
 	// append to list of pubkeys
-	for (var i = start_idx; i < argv._.length; i++) {
-		datastore['pubkeys'].push(String(argv._[i]));
+	for (var i = start_idx; i < program.args.length; i++) {
+		datastore['pubkeys'].push(String(program.args[i]));
 	}
 }
 
@@ -150,9 +151,9 @@ function cmd_inputs()
 	if (datastore['inputs'] == undefined)
 		datastore['inputs'] = [];
 
-	for (var i = 1; i < argv._.length; i += 2) {
-		var txid = String(argv._[i]);
-		var vout = argv._[i + 1];
+	for (var i = 1; i < program.args.length; i += 2) {
+		var txid = String(program.args[i]);
+		var vout = program.args[i + 1];
 		var obj = {
 			'txid' : txid,
 			'vout' : vout
@@ -169,9 +170,9 @@ function cmd_outputs()
 	if (datastore['outputs'] == undefined)
 		datastore['outputs'] = {};
 
-	for (var i = 1; i < argv._.length; i += 2) {
-		var addr = String(argv._[i]);
-		var value = argv._[i + 1];
+	for (var i = 1; i < program.args.length; i += 2) {
+		var addr = String(program.args[i]);
+		var value = program.args[i + 1];
 
 		datastore['outputs'][addr] = value;
 	}
@@ -297,8 +298,8 @@ function cmd_raw_sign(start_idx)
 	var anypay = false;
 
 	// scan list of command line options
-	for (var i = start_idx; i < argv._.length; i++) {
-		switch (argv._[i]) {
+	for (var i = start_idx; i < program.args.length; i++) {
+		switch (program.args[i]) {
 		case "anyonecanpay":
 			anypay = true;
 			break;
@@ -338,13 +339,13 @@ function cmd_wallet_msig()
 
 function main()
 {
-	if (argv._.length == 0) {
+	if (program.args.length == 0) {
 		console.error("No command specified.");
 		list_commands();
 		return;
 	}
 
-	var cmd = argv._[0];
+	var cmd = program.args[0];
 	
 	if (cmd != 'init' && cmd != 'help' && cmd != 'clean') {
 		try {
@@ -402,9 +403,9 @@ function main()
 		break;
 
 	case "pubkey.get":
-		if (argv._.length < 2)
+		if (program.args.length < 2)
 			throw new Error("Missing required address param");
-		cmd_pubkey_get(argv._[1]);
+		cmd_pubkey_get(program.args[1]);
 		break;
 
 	case "pubkeys":
@@ -417,14 +418,14 @@ function main()
 		break;
 
 	case "raw":
-		if (argv._.length < 2)
+		if (program.args.length < 2)
 			throw new Error("Missing required hex-string param");
-		cmd_raw(argv._[1], false);
+		cmd_raw(program.args[1], false);
 		break;
 	case "raw.append":
-		if (argv._.length < 2)
+		if (program.args.length < 2)
 			throw new Error("Missing required filename param");
-		cmd_raw_append(argv._[1]);
+		cmd_raw_append(program.args[1]);
 		break;
 	case "raw.clear":
 		delete datastore['raw'];
@@ -437,14 +438,14 @@ function main()
 		cmd_raw_decode();
 		break;
 	case "raw.get":
-		if (argv._.length < 2)
+		if (program.args.length < 2)
 			throw new Error("Missing required txid param");
-		cmd_raw_get(argv._[1]);
+		cmd_raw_get(program.args[1]);
 		break;
 	case "raw.read":
-		if (argv._.length < 2)
+		if (program.args.length < 2)
 			throw new Error("Missing required filename param");
-		cmd_raw_read(argv._[1]);
+		cmd_raw_read(program.args[1]);
 		break;
 	case "raw.send":
 		cmd_raw_send();
@@ -453,9 +454,9 @@ function main()
 		cmd_raw_sign(1);
 		break;
 	case "raw.write":
-		if (argv._.length < 2)
+		if (program.args.length < 2)
 			throw new Error("Missing required filename param");
-		cmd_raw_write(argv._[1]);
+		cmd_raw_write(program.args[1]);
 		break;
 
 	case "wallet.msig":
