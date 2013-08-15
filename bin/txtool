@@ -6,6 +6,7 @@ var fs = require('fs');
 var util = require('util');
 var program = require('commander');
 var BitcoinRPC = require('libcoin/RpcClient').class();
+var Wallet = require('libcoin/Wallet').class();
 var TXTOOL_VERSION = '0.2';
 var rpc = new BitcoinRPC({
 		'port' : 18332,
@@ -17,11 +18,38 @@ var rpc = new BitcoinRPC({
 program
 	.version(TXTOOL_VERSION)
 	.option('-f, --file [file]', 'Load/store transaction state to/from JSON file [txstatedb.json]', 'txstatedb.json')
+	.option('-P, --pass [passphrase]', 'AES wallet passphrase')
+	.option('-w, --wallet [file]', 'AES wallet filename')
 	.parse(process.argv);
 
 var statedb_fn = program.file;
 
+// Our empty wallet defaults
+var wallet = undefined;
+var network = undefined;
+
 var datastore = {};
+
+function network_load(netname)
+{
+	wallet.setNetwork(netname);
+	network = wallet.network;
+}
+
+function wallet_load(filename)
+{
+	wallet.readSync(filename, program.pass);
+	network_load(wallet.datastore.network);
+}
+
+if (program.wallet) {
+	var wallet = new Wallet();
+	wallet.datastore.client = 'txtool';
+	wallet.datastore.client_version = TXTOOL_VERSION;
+	wallet.datastore.network = 'livenet';
+
+	wallet_load(program.wallet);
+}
 
 function list_commands()
 {
