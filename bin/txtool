@@ -6,7 +6,9 @@ var fs = require('fs');
 var util = require('util');
 var program = require('commander');
 var BitcoinRPC = require('libcoin/RpcClient').class();
+var Address = require('libcoin/Address').class();
 var Wallet = require('libcoin/Wallet').class();
+var Script = require('libcoin/Script').class();
 var TXTOOL_VERSION = '0.2';
 var rpc = new BitcoinRPC({
 		'port' : 18332,
@@ -40,6 +42,11 @@ function wallet_load(filename)
 {
 	wallet.readSync(filename, program.pass);
 	network_load(wallet.datastore.network);
+}
+
+function wallet_store()
+{
+	wallet.writeSync(program.wallet, program.pass);
 }
 
 if (program.wallet) {
@@ -356,13 +363,30 @@ function wallet_msig_cb(err, resp)
 	console.log(resp['result']);
 }
 
+function cmd_wallet_msig_rpc()
+{
+	rpc.addMultiSigAddress(datastore['n_required'], datastore['pubkeys'],
+			       wallet_msig_cb);
+}
+
+function cmd_wallet_msig_file()
+{
+	var pubkeys = wallet.expandKeys(datastore['pubkeys']);
+	var script = Script.createMultisig(datastore['n_required'], pubkeys);
+	var addrStr = wallet.addScript(script);
+	wallet_store();
+	console.log(addrStr);
+}
+
 function cmd_wallet_msig()
 {
 	if (!datastore['n_required'] || !datastore['pubkeys'])
 		throw new Error("Missing N-Required and/or pubkeys");
 
-	rpc.addMultiSigAddress(datastore['n_required'], datastore['pubkeys'],
-			       wallet_msig_cb);
+	if (wallet)
+		cmd_wallet_msig_file();
+	else
+		cmd_wallet_msig_rpc();
 }
 
 function main()
