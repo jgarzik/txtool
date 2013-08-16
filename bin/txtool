@@ -6,9 +6,11 @@ var fs = require('fs');
 var util = require('util');
 var program = require('commander');
 var BitcoinRPC = require('libcoin/RpcClient').class();
+var Transaction = require('libcoin/Transaction').class();
 var Address = require('libcoin/Address').class();
 var Wallet = require('libcoin/Wallet').class();
 var Script = require('libcoin/Script').class();
+var coinUtil = require('libcoin/util/util');
 var TXTOOL_VERSION = '0.2';
 var rpc = new BitcoinRPC({
 		'port' : 18332,
@@ -253,6 +255,50 @@ function cmd_raw(in_str, append)
 	write_datastore(function(err) {});
 }
 
+function cmd_raw_create_internal()
+{
+	var txobj = {};
+	txobj.version = 1;
+	txobj.lock_time = 0;
+	txobj.ins = [];
+	txobj.outs = [];
+
+	datastore.inputs.forEach(function(inputobj) {
+		var txin = {};
+		txin.s = coinUtil.EMPTY_BUFFER;
+		txin.q = 0xffffffff;
+
+		var hash = new Buffer(inputobj.txid, 'hex');
+		var vout = parseInt(inputobj.vout);
+		var voutBuf = new Buffer(4);
+		voutBuf.writeUInt32LE(vout, 0);
+
+		txin.o = Buffer.concat([hash, voutBuf]);
+
+		txobj.ins.push(txin);
+	});
+
+	var keys = Object.keys(datastore.outputs);
+	keys.forEach(function(addrStr) {
+		var addr = new Address(addrStr);
+		var script = Script.createPubKeyHashOut(addr.payload());
+
+		// ugh
+		var value = parseFloat(datastore.outputs[addrStr]) * 100000000;
+		var valbuf = coinUtil.buf64(value);
+
+		var txout = {
+			v: valbuf,
+			s: script.getBuffer(),
+		};
+
+		txobj.outs.push(txout);
+	});
+
+	var tx = new Transaction(txobj);
+	cmd_raw(tx.serialize().toString('hex'), false);
+}
+
 function raw_create_cb(err, resp)
 {
 	if (err) throw new Error(err['message']);
@@ -264,8 +310,11 @@ function cmd_raw_create()
 	if (!datastore['inputs'] || !datastore['outputs'])
 		throw new Error("missing inputs and/or outputs");
 
-	rpc.createRawTransaction(datastore['inputs'], datastore['outputs'],
-				 raw_create_cb);
+	if (wallet)
+		cmd_raw_create_internal();
+	else
+		rpc.createRawTransaction(datastore['inputs'], datastore['outputs'],
+				 	raw_create_cb);
 }
 
 function raw_decode_cb(err, resp)
