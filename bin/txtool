@@ -2,6 +2,7 @@
 // MIT/X11-like license.  See LICENSE.txt.
 // Copyright 2013 BitPay, Inc.
 
+require('buffertools');
 var fs = require('fs');
 var util = require('util');
 var program = require('commander');
@@ -269,6 +270,7 @@ function cmd_raw_create_internal()
 		txin.q = 0xffffffff;
 
 		var hash = new Buffer(inputobj.txid, 'hex');
+		hash.reverse();
 		var vout = parseInt(inputobj.vout);
 		var voutBuf = new Buffer(4);
 		voutBuf.writeUInt32LE(vout, 0);
