@@ -157,22 +157,43 @@ function cmd_nreq()
 	write_datastore(function(err) {});
 }
 
+function ds_push_pubkey(pubkeyStr)
+{
+	if (datastore['pubkeys'] == undefined)
+		datastore['pubkeys'] = [];
+
+	datastore['pubkeys'].push(pubkeyStr);
+
+	console.log(pubkeyStr);
+}
+
 function pubkey_get_cb(err, resp)
 {
 	if (err) throw new Error(err['message']);
 	if (!resp['result']['pubkey'])
 		throw new Error("Unable to obtain pubkey from RPC wallet");
 
-	if (datastore['pubkeys'] == undefined)
-		datastore['pubkeys'] = [];
+	ds_push_pubkey(String(resp['result']['pubkey']));
+	write_datastore(function(err) {});
+}
 
-	datastore['pubkeys'].push(String(resp['result']['pubkey']));
+function cmd_pubkey_get_file(addrStr)
+{
+	var addr = new Address(addrStr);
+	var obj = wallet.findKeyHash(addr.payload());
+	if (!obj)
+		throw new Error("Unable to obtain pubkey from wallet");
+
+	ds_push_pubkey(obj.pub);
 	write_datastore(function(err) {});
 }
 
 function cmd_pubkey_get(address)
 {
-	rpc.validateAddress(address, pubkey_get_cb);
+	if (wallet)
+		cmd_pubkey_get_file(address);
+	else
+		rpc.validateAddress(address, pubkey_get_cb);
 }
 
 function cmd_pubkeys()
