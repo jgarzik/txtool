@@ -36,6 +36,10 @@ node modules ("npm install $module_name"):
 txtool command summary
 ----------------------
 
+If the command notes "(RPC)", that indicates bitcoind wallet and RPC are used.
+If the command notes "(JSON)", that indicates a local, AES-encrypted
+JSON wallet file is used.
+
 clean
 	Remove transaction state database, and any associated
 	temporary files.
@@ -69,8 +73,8 @@ outputs.clear
 
 pubkey.get ADDRESS
 
-	RPC: Obtain full pubkey, given bitcoin address (pubkey hash),
-	from bitcoind wallet.
+	Obtain full pubkey, given bitcoin address (pubkey hash),
+	from bitcoind wallet (RPC) or local wallet file (JSON).
 
 pubkeys KEY1 KEY2 KEY3...
 	Append to list of pubkeys / bitcoin addresses
@@ -88,34 +92,34 @@ raw.clear
 	Clear serialized tx data.
 
 raw.create
-	RPC: create raw transaction, given inputs and outputs.
+	create raw transaction, given inputs and outputs.
 
 raw.decode
-	RPC: decode raw transaction to readable JSON object.
+	(RPC) decode raw transaction to readable JSON object.
 
 raw.get TXID
-	RPC: get raw transaction, given hash txid.
+	(RPC) get raw transaction, given hash txid.
 
 raw.read FILE
 	Input serialized transaction from file.
 
-raw.write FILE
-	Output serialized transaction to file.
+raw.send
+	(RPC) broadcast raw transaction to network,
+	returning a transaction id.
 
 raw.sign [anyonecanpay]
-	RPC: sign raw transaction, if possible.
+	(RPC) sign raw transaction, if possible.
 	Uses keys in bitcoind's wallet.
 
 	If the optional argument "anyonecanpay" is supplied,
 	outputs are locked, but third party inputs may change.
 
-raw.send
-	RPC: broadcast raw transaction to network,
-	returning a transaction id.
+raw.write FILE
+	Output serialized transaction to file.
 
 wallet.msig
-	Commit in-memory multisig data (N-Required, Keys) to RPC wallet,
-	returning a multisig payment address.
+	(RPC, JSON) Commit in-memory multisig data (N-Required, Keys)
+	to wallet, returning a multisig payment address.
 
 
 Encryption (walletpassphrase) note

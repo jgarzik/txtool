@@ -69,26 +69,26 @@ function list_commands()
 	s += "dump\t\tInspect internal transaction state\n";
 	s += "help\t\tList this command summary\n";
 	s += "init\t\tInitialize new transaction state database\n";
-	s += "inputs TXID1 VOUT1 TXID2 VOUT2...\n";
-	s += "inputs.clear\n";
+	s += "inputs TXID1 VOUT1 TXID2 VOUT2...\n\t\tAppend inputs to TX\n";
+	s += "inputs.clear\tClear list of inputs\n";
 	s += "multisig N-REQUIRED KEY1 KEY2 KEY3...\n\t\tBegin new multi-sig tx\n";
 	s += "nreq N-REQUIRED\tSpecific number of sigs required for a multisig tx\n";
-	s += "outputs ADDRESS1 VALUE1 ADDRESS2 VALUE2...\n";
-	s += "outputs.clear\n";
-	s += "pubkey.get ADDRESS\n\t\tRPC: Lookup pubkey, given bitcoin address\n";
+	s += "outputs ADDRESS1 VALUE1 ADDRESS2 VALUE2...\n\t\tAppend outs to TX\n";
+	s += "outputs.clear\tClear list of TX outputs\n";
+	s += "pubkey.get ADDRESS\n\t\tLookup pubkey in wallet, given bitcoin address\n";
 	s += "pubkeys KEY1 KEY2 KEY3...\n\t\tAdd to list of pubkeys / bitcoin addresses\n";
 	s += "pubkeys.clear\tClear list of pubkeys\n";
 	s += "raw SERIALIZED-TX\n\t\tInput serialized transaction from command line\n";
 	s += "raw.append FILE\tAppend FILE to serialized transaction data\n";
 	s += "raw.clear\tClear serialized tx data\n";
-	s += "raw.create\n";
+	s += "raw.create\tCreate raw tx, given inputs/outputs parameters\n";
 	s += "raw.decode\tDecode raw tx, to JSON object\n";
 	s += "raw.get TXID\tGet raw tx, given hash txid\n";
 	s += "raw.read FILE\tInput serialized transaction from file\n";
-	s += "raw.send\n";
-	s += "raw.sign [anyonecanpay]\n";
+	s += "raw.send\tSend raw tx to network via RPC\n";
+	s += "raw.sign [anyonecanpay]\tSign transaction, if possible\n";
 	s += "raw.write FILE\tOutput serialize transaction to file\n";
-	s += "wallet.msig\tCommit in-memory multisig data to RPC wallet,\n\t\treturning a multisig payment address.\n";
+	s += "wallet.msig\tCommit in-memory multisig data to wallet,\n\t\treturning a multisig payment address.\n";
 	console.log(s);
 }
 
@@ -301,22 +301,12 @@ function cmd_raw_create_internal()
 	cmd_raw(tx.serialize().toString('hex'), false);
 }
 
-function raw_create_cb(err, resp)
-{
-	if (err) throw new Error(err['message']);
-	cmd_raw(resp['result'], false);
-}
-
 function cmd_raw_create()
 {
 	if (!datastore['inputs'] || !datastore['outputs'])
 		throw new Error("missing inputs and/or outputs");
 
-	if (wallet)
-		cmd_raw_create_internal();
-	else
-		rpc.createRawTransaction(datastore['inputs'], datastore['outputs'],
-				 	raw_create_cb);
+	cmd_raw_create_internal();
 }
 
 function raw_decode_cb(err, resp)
