@@ -12,6 +12,7 @@ var Address = require('libcoin/Address').class();
 var Wallet = require('libcoin/Wallet').class();
 var Script = require('libcoin/Script').class();
 var coinUtil = require('libcoin/util/util');
+var Parser = require('libcoin/util/BinaryParser').class();
 var bignum = require('bignum');
 var TXTOOL_VERSION = '0.2';
 var rpc = new BitcoinRPC({
@@ -370,6 +371,45 @@ function cmd_raw_send()
 	rpc.sendRawTransaction(datastore['raw'], raw_send_cb);
 }
 
+function cmd_raw_sign_internal2(anypay, tx, inputs, inputTxs)
+{
+	for (var i = 0; i < inputs.length; i++) {
+		var input = inputs[i];
+		var hashStr = coinUtil.formatHashFull(input[0]);
+		var txoutKey = hashStr + ' ' + input[1]);
+
+		// FIXME
+	}
+}
+
+function cmd_raw_sign_internal(anypay)
+{
+	var rawbuf = new Buffer(datastore['raw'], 'hex');
+	var parser = new Parser(rawbuf);
+	var tx = new Transaction();
+	tx.parse(parser);
+	var inputs = tx.inputs();
+	var inputTxs = {};
+
+	var stored = 0;
+	for (var i = 0; i < inputs.length; i++) {
+		var input = inputs[i];
+		var hashStr = coinUtil.formatHashFull(input[0]);
+		rpc.getTxOut(hashStr, input[1], function(err, resp) {
+			if (err) throw new Error(err['message']);
+
+			var rpcres = resp['result'];
+			var scriptObj = rpcres['scriptPubKey'];
+
+			var txoutKey = hashStr + ' ' + input[1]);
+			inputTxs[txoutKey] = scriptObj;
+
+			if (stored == inputs.length)
+				cmd_raw_sign_internal2(anypay, tx, inputs, inputTxs);
+		});
+	}
+}
+
 function raw_sign_cb(err, resp)
 {
 	if (err) throw new Error(err['message']);
@@ -406,9 +446,12 @@ function cmd_raw_sign(start_idx)
 		}
 	}
 
-	rpc.signRawTransaction(datastore['raw'], null, null,
-			       anypay ? 'ALL|ANYONECANPAY' : 'ALL',
-			       raw_sign_cb);
+	if (wallet)
+		cmd_raw_sign_internal(anypay)
+	else
+		rpc.signRawTransaction(datastore['raw'], null, null,
+				       anypay ? 'ALL|ANYONECANPAY' : 'ALL',
+				       raw_sign_cb);
 }
 
 function cmd_raw_write(filename)
