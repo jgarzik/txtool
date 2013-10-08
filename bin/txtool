@@ -376,7 +376,7 @@ function cmd_raw_sign_internal2(anypay, tx, inputs, inputTxs)
 	for (var i = 0; i < inputs.length; i++) {
 		var input = inputs[i];
 		var hashStr = coinUtil.formatHashFull(input[0]);
-		var txoutKey = hashStr + ' ' + input[1]);
+		var txoutKey = hashStr + ' ' + input[1];
 
 		// FIXME
 	}
@@ -401,7 +401,7 @@ function cmd_raw_sign_internal(anypay)
 			var rpcres = resp['result'];
 			var scriptObj = rpcres['scriptPubKey'];
 
-			var txoutKey = hashStr + ' ' + input[1]);
+			var txoutKey = hashStr + ' ' + input[1];
 			inputTxs[txoutKey] = scriptObj;
 
 			if (stored == inputs.length)
