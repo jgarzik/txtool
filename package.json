@@ -35,11 +35,11 @@
     "node": ">=0.8"
   },
   "dependencies": {
-    "classtool": "=1.0.0",
-    "commander": "=2.0.0",
-    "buffertools": "=1.1.1",
-    "bignum": "=0.6.1",
-    "libcoin": "=0.1.4"
+    "classtool": ">=1.0.0",
+    "commander": ">=2.0.0",
+    "buffertools": ">=1.1.1",
+    "bignum": ">=0.6.1",
+    "libcoin": ">=0.1.4"
   },
   "devDependencies": {},
   "license": "MIT"
