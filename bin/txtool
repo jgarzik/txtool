@@ -371,15 +371,54 @@ function cmd_raw_send()
 	rpc.sendRawTransaction(datastore['raw'], raw_send_cb);
 }
 
-function cmd_raw_sign_internal2(anypay, tx, inputs, inputTxs)
+function cmd_raw_sign_pubkeyhash(anyway, tx, i, script)
 {
-	for (var i = 0; i < inputs.length; i++) {
-		var input = inputs[i];
-		var hashStr = coinUtil.formatHashFull(input[0]);
-		var txoutKey = hashStr + ' ' + input[1];
+	// FIXME
+}
 
-		// FIXME
+function cmd_raw_sign_scripthash(anyway, tx, i, script)
+{
+	// FIXME
+}
+
+function cmd_raw_sign_multisig(anyway, tx, i, script)
+{
+	// FIXME
+}
+
+function cmd_raw_sign_pubkey(anyway, tx, i, script)
+{
+	// FIXME
+}
+
+function cmd_raw_sign_internal2(anypay, tx, i, scriptObj)
+{
+	var txin = tx.ins[i];
+	if (txin.s)
+		return -1;	// already signed, did no work
+
+	var scriptBuf = new Buffer(scriptObj['hex'], 'hex');
+	var script = new Script(scriptBuf);
+	var scriptType = script.classify();
+
+	switch (scriptType) {
+	case TX_UNKNOWN:
+		break;
+	case TX_PUBKEYHASH:
+		cmd_raw_sign_pubkeyhash(anyway, tx, i, script);
+		break;
+	case TX_SCRIPTHASH:
+		cmd_raw_sign_scripthash(anyway, tx, i, script);
+		break;
+	case TX_MULTISIG:
+		cmd_raw_sign_multisig(anyway, tx, i, script);
+		break;
+	case TX_PUBKEY:
+		cmd_raw_sign_pubkey(anyway, tx, i, script);
+		break;
 	}
+	
+	return 0;		// did no work; signed nothing
 }
 
 function cmd_raw_sign_internal(anypay)
@@ -389,9 +428,7 @@ function cmd_raw_sign_internal(anypay)
 	var tx = new Transaction();
 	tx.parse(parser);
 	var inputs = tx.inputs();
-	var inputTxs = {};
 
-	var stored = 0;
 	for (var i = 0; i < inputs.length; i++) {
 		var input = inputs[i];
 		var hashStr = coinUtil.formatHashFull(input[0]);
@@ -401,11 +438,7 @@ function cmd_raw_sign_internal(anypay)
 			var rpcres = resp['result'];
 			var scriptObj = rpcres['scriptPubKey'];
 
-			var txoutKey = hashStr + ' ' + input[1];
-			inputTxs[txoutKey] = scriptObj;
-
-			if (stored == inputs.length)
-				cmd_raw_sign_internal2(anypay, tx, inputs, inputTxs);
+			cmd_raw_sign_internal2(anypay, tx, i, scriptObj);
 		});
 	}
 }
