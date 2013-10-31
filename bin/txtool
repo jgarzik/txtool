@@ -376,7 +376,7 @@ function cmd_raw_sign_pubkeyhash(anypay, tx, i, scriptPubKey, txSigHash)
 	var pubKeyHash = scriptPubKey.captureOne();
 	var wkey = wallet.findKeyHash(pubKeyHash);
 	if (!wkey)
-		return;
+		return 0;		// did no work; signed nothing
 
 	var wkey = new WalletKey({network: network});
 	wkey.fromObj(wkeyObj);
@@ -394,6 +394,8 @@ function cmd_raw_sign_pubkeyhash(anypay, tx, i, scriptPubKey, txSigHash)
 	scriptSig.updateBuffer();
 
 	tx.ins[i].s = scriptSig.getBuffer();
+
+	return 1;			// signed 1 signature
 }
 
 function pubkeyHexHash(pubkeyHex)
@@ -416,7 +418,7 @@ function cmd_raw_sign_pubkey(anypay, tx, i, scriptPubKey, txSigHash)
 	var pubKeyHash = coinUtil.sha256ripe160(pubkey);
 	var wkeyObj = wallet.findKeyHash(pubKeyHash);
 	if (!wkeyObj)
-		return;
+		return 0;		// did no work; signed nothing
 
 	var wkey = new WalletKey({network: network});
 	wkey.fromObj(wkeyObj);
@@ -433,6 +435,8 @@ function cmd_raw_sign_pubkey(anypay, tx, i, scriptPubKey, txSigHash)
 	scriptSig.updateBuffer();
 
 	tx.ins[i].s = scriptSig.getBuffer();
+
+	return 1;			// signed 1 signature
 }
 
 function updateMultiSig(scriptSigBuf, sig, index, n_keys)
@@ -457,6 +461,7 @@ function cmd_raw_sign_multisig(anypay, tx, i, scriptPubKey, txSigHash)
 	var pubkeys = scriptPubKey.capture();
 	var wkeys = {};
 	var index = 0;
+	var n_signed = 0;
 	pubkeys.forEach(function(pubkey) {
 		var pubKeyHash = coinUtil.sha256ripe160(pubkey);
 		var wkeyObj = wallet.findKeyHash(pubKeyHash);
@@ -473,15 +478,56 @@ function cmd_raw_sign_multisig(anypay, tx, i, scriptPubKey, txSigHash)
 
 			tx.ins[i].s = updateMultiSig(tx.ins[i].s, sig,
 						index, pubkeys.length);
+			n_signed++;
 		}
 
 		index++;
 	});
+
+	return n_signed;
 }
 
 function cmd_raw_sign_scripthash(anypay, tx, i, scriptPubKey, txSigHash)
 {
-	// FIXME
+	var scriptHash = scriptPubKey.capture();
+	var addr = new Address(network.addressScript, scriptHash);
+	var addrStr = addr.as('base58');
+	if (!(addrStr in wallet.scripts))
+		return;
+
+	var scriptHex = wallet.scripts[addrStr];
+	var scriptBuf = new Buffer(scriptHex, 'hex');
+	var scriptPubKey = new Script(scriptBuf);
+	var scriptType = scriptPubKey.classify();
+	var rc = -1;
+
+	var txSigHash = tx.hashForsignature(scriptPubKey, i,
+				       anypay ? SIGHASH_ANYONECANPAY :
+				       SIGHASH_ALL);
+	switch (scriptType) {
+	case TX_PUBKEYHASH:
+		rc = cmd_raw_sign_pubkeyhash(anypay, tx, i, scriptPubKey, txSigHash);
+		break;
+	case TX_MULTISIG:
+		rc = cmd_raw_sign_multisig(anypay, tx, i, scriptPubKey, txSigHash);
+		break;
+	case TX_PUBKEY:
+		rc = cmd_raw_sign_pubkey(anypay, tx, i, scriptPubKey, txSigHash);
+		break;
+	default:
+		return -1;
+	}
+
+	if (rc > 0) {		// FIXME: wrong for some multisig
+		var scriptSigBuf = tx.ins[i].s;
+		var scriptSig = new Script(scriptSigBuf);
+		scriptSig.chunks.push(scriptBuf);
+		scriptSig.updateBuffer();
+		tx.ins[i].s = scriptSig.getBuffer();
+	}
+	
+	return rc;
+
 }
 
 function cmd_raw_sign_internal2(anypay, tx, i, scriptObj)
@@ -493,6 +539,7 @@ function cmd_raw_sign_internal2(anypay, tx, i, scriptObj)
 	var scriptBuf = new Buffer(scriptObj['hex'], 'hex');
 	var scriptPubKey = new Script(scriptBuf);
 	var scriptType = scriptPubKey.classify();
+	var rc = -1;
 
 	var txSigHash = tx.hashForsignature(scriptPubKey, i,
 				       anypay ? SIGHASH_ANYONECANPAY :
@@ -501,16 +548,16 @@ function cmd_raw_sign_internal2(anypay, tx, i, scriptObj)
 	case TX_UNKNOWN:
 		break;
 	case TX_PUBKEYHASH:
-		cmd_raw_sign_pubkeyhash(anypay, tx, i, scriptPubKey, txSigHash);
+		rc = cmd_raw_sign_pubkeyhash(anypay, tx, i, scriptPubKey, txSigHash);
 		break;
 	case TX_SCRIPTHASH:
-		cmd_raw_sign_scripthash(anypay, tx, i, scriptPubKey, txSigHash);
+		rc = cmd_raw_sign_scripthash(anypay, tx, i, scriptPubKey, txSigHash);
 		break;
 	case TX_MULTISIG:
-		cmd_raw_sign_multisig(anypay, tx, i, scriptPubKey, txSigHash);
+		rc = cmd_raw_sign_multisig(anypay, tx, i, scriptPubKey, txSigHash);
 		break;
 	case TX_PUBKEY:
-		cmd_raw_sign_pubkey(anypay, tx, i, scriptPubKey, txSigHash);
+		rc = cmd_raw_sign_pubkey(anypay, tx, i, scriptPubKey, txSigHash);
 		break;
 	}
 	
