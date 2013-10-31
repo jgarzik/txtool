@@ -396,16 +396,6 @@ function cmd_raw_sign_pubkeyhash(anypay, tx, i, scriptPubKey, txSigHash)
 	tx.ins[i].s = scriptSig.getBuffer();
 }
 
-function cmd_raw_sign_scripthash(anypay, tx, i, scriptPubKey, txSigHash)
-{
-	// FIXME
-}
-
-function cmd_raw_sign_multisig(anypay, tx, i, scriptPubKey, txSigHash)
-{
-	// FIXME
-}
-
 function pubkeyHexHash(pubkeyHex)
 {
 	var pubkey = new Buffer(pubkeyHex, 'hex');
@@ -443,6 +433,55 @@ function cmd_raw_sign_pubkey(anypay, tx, i, scriptPubKey, txSigHash)
 	scriptSig.updateBuffer();
 
 	tx.ins[i].s = scriptSig.getBuffer();
+}
+
+function updateMultiSig(scriptSigBuf, sig, index, n_keys)
+{
+	if (!scriptSigBuf)
+		scriptSigBuf = util.EMPTY_BUFFER;
+	var scriptSig = new Script(scriptSigBuf);
+
+	if (scriptSig.chunks.length < n_keys) {
+		while (scriptSig.chunks.length < n_keys)
+			scriptSig.chunks.push(util.EMPTY_BUFFER);
+	}
+	
+	scriptSig.chunks[index] = sig;
+	scriptSig.updateBuffer();
+
+	return scriptSig.getBuffer();
+}
+
+function cmd_raw_sign_multisig(anypay, tx, i, scriptPubKey, txSigHash)
+{
+	var pubkeys = scriptPubKey.capture();
+	var wkeys = {};
+	var index = 0;
+	pubkeys.forEach(function(pubkey) {
+		var pubKeyHash = coinUtil.sha256ripe160(pubkey);
+		var wkeyObj = wallet.findKeyHash(pubKeyHash);
+		if (wkeyObj) {
+			var wkey = new WalletKey({network: network});
+			wkey.fromObj(wkeyObj);
+
+			var sigRaw = wkey.privKey.signSync(txSigHash);
+
+			var sigType = new Buffer(1);
+			sigType[0] = anypay? SIGHASH_ANYONECANPAY : SIGHASH_ALL;
+
+			var sig = Buffer.concat(sigRaw, sigType);
+
+			tx.ins[i].s = updateMultiSig(tx.ins[i].s, sig,
+						index, pubkeys.length);
+		}
+
+		index++;
+	});
+}
+
+function cmd_raw_sign_scripthash(anypay, tx, i, scriptPubKey, txSigHash)
+{
+	// FIXME
 }
 
 function cmd_raw_sign_internal2(anypay, tx, i, scriptObj)
