@@ -530,10 +530,13 @@ function cmd_raw_sign_scripthash(anypay, tx, i, scriptPubKey, txSigHash)
 
 }
 
-function cmd_raw_sign_internal2(anypay, tx, i, scriptObj)
+function cmd_raw_sign_internal2(anypay, tx, inputIdx, scriptObj)
 {
-	var txin = tx.ins[i];
-	if (txin.s)
+	// console.dir(tx);
+	var txin = tx.ins[inputIdx];
+	if (!txin)
+		return -2;	// invalid?
+	if (txin.s.length > 0)
 		return -1;	// already signed, did no work
 
 	var scriptBuf = new Buffer(scriptObj['hex'], 'hex');
@@ -541,23 +544,23 @@ function cmd_raw_sign_internal2(anypay, tx, i, scriptObj)
 	var scriptType = scriptPubKey.classify();
 	var rc = -1;
 
-	var txSigHash = tx.hashForsignature(scriptPubKey, i,
-				       anypay ? SIGHASH_ANYONECANPAY :
-				       SIGHASH_ALL);
+	var txSigHash = tx.hashForSignature(scriptPubKey, inputIdx,
+				       anypay ? Transaction.SIGHASH_ANYONECANPAY :
+				       Transaction.SIGHASH_ALL);
 	switch (scriptType) {
 	case TX_UNKNOWN:
 		break;
 	case TX_PUBKEYHASH:
-		rc = cmd_raw_sign_pubkeyhash(anypay, tx, i, scriptPubKey, txSigHash);
+		rc = cmd_raw_sign_pubkeyhash(anypay, tx, inputIdx, scriptPubKey, txSigHash);
 		break;
 	case TX_SCRIPTHASH:
-		rc = cmd_raw_sign_scripthash(anypay, tx, i, scriptPubKey, txSigHash);
+		rc = cmd_raw_sign_scripthash(anypay, tx, inputIdx, scriptPubKey, txSigHash);
 		break;
 	case TX_MULTISIG:
-		rc = cmd_raw_sign_multisig(anypay, tx, i, scriptPubKey, txSigHash);
+		rc = cmd_raw_sign_multisig(anypay, tx, inputIdx, scriptPubKey, txSigHash);
 		break;
 	case TX_PUBKEY:
-		rc = cmd_raw_sign_pubkey(anypay, tx, i, scriptPubKey, txSigHash);
+		rc = cmd_raw_sign_pubkey(anypay, tx, inputIdx, scriptPubKey, txSigHash);
 		break;
 	}
 	
@@ -572,8 +575,10 @@ function cmd_raw_sign_internal(anypay)
 	tx.parse(parser);
 	var inputs = tx.inputs();
 
-	for (var i = 0; i < inputs.length; i++) {
-		var input = inputs[i];
+	var inputIdx = 0;
+	do {
+		var inputIdxCopy = inputIdx;
+		var input = inputs[inputIdxCopy];
 		var hashStr = coinUtil.formatHashFull(input[0]);
 		rpc.getTxOut(hashStr, input[1], function(err, resp) {
 			if (err) throw new Error(err['message']);
@@ -581,9 +586,12 @@ function cmd_raw_sign_internal(anypay)
 			var rpcres = resp['result'];
 			var scriptObj = rpcres['scriptPubKey'];
 
-			cmd_raw_sign_internal2(anypay, tx, i, scriptObj);
+			var rc = cmd_raw_sign_internal2(anypay, tx, inputIdxCopy, scriptObj);
+			// console.log("int2 rc = ", rc);
 		});
-	}
+
+		inputIdx++;
+	} while (inputIdx < inputs.length);
 }
 
 function raw_sign_cb(err, resp)
