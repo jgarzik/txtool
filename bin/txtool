@@ -15,19 +15,23 @@ var coinUtil = require('libcoin/util/util');
 var Parser = require('libcoin/util/BinaryParser').class();
 var bignum = require('bignum');
 var TXTOOL_VERSION = '0.2';
-var rpc = new BitcoinRPC({
-		'port' : 18332,
-		'user' : 'user',
-		'pass' : 'pass',
-		'protocol' : 'http'
-});
 
 program
 	.version(TXTOOL_VERSION)
 	.option('-f, --file [file]', 'Load/store transaction state to/from JSON file [txstatedb.json]', 'txstatedb.json')
 	.option('-P, --pass [passphrase]', 'AES wallet passphrase')
 	.option('-w, --wallet [file]', 'AES wallet filename')
+	.option('--rpcport [port]', 'Bitcoind RPC port [18332]', Number, 18332)
+	.option('--rpcuser [user]', 'Bitcoind RPC user [user]', String, 'user')
+	.option('--rpcpass [password]', 'Bitcoind RPC password [pass]', String, 'pass')
 	.parse(process.argv);
+
+var rpc = new BitcoinRPC({
+		'port' : program.rpcport,
+		'user' : program.rpcuser,
+		'pass' : program.rpcpass,
+		'protocol' : 'http'
+});
 
 var statedb_fn = program.file;
 
