@@ -56,7 +56,7 @@ function wallet_store()
 
 if (program.wallet) {
 	var wallet = new Wallet();
-	wallet.datastore.client = 'txtool';
+	wallet.datastore.client = 'cosign';
 	wallet.datastore.client_version = TXTOOL_VERSION;
 	wallet.datastore.network = 'livenet';
 
@@ -65,7 +65,7 @@ if (program.wallet) {
 
 function list_commands()
 {
-	var s = "txtool command summary:\n";
+	var s = "cosign command summary:\n";
 	s += "clean\t\tRemove transaction state database\n";
 	s += "dump\t\tInspect internal transaction state\n";
 	s += "help\t\tList this command summary\n";
