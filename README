@@ -1,7 +1,7 @@
 
 Build bitcoin transactions
 --------------------------
-Usage: txtool [options] COMMAND [command parameters]
+Usage: cosign [options] COMMAND [command parameters]
 
 Options:
   -f, --file  Load/store transaction state to/from FILE
@@ -11,10 +11,10 @@ Theory of operation
 -------------------
 All operation revolves around an internal database, which is modified
 via execution of a command operation:
-	1. txtool reads transaction state file (JSON). Default "txstatedb.json".
-	2. txtool executes command given on command line,
+	1. cosign reads transaction state file (JSON). Default "txstatedb.json".
+	2. cosign executes command given on command line,
 	   updating transaction state.
-	3. txtool writes transaction state file, overwriting
+	3. cosign writes transaction state file, overwriting
 	   previous version.
 
 "transaction state" is anything involving the given transaction being
@@ -33,7 +33,7 @@ node modules ("npm install $module_name"):
 	libcoin		-- https://github.com/gasteve/node-libcoin
 
 
-txtool command summary
+cosign command summary
 ----------------------
 
 If the command notes "(RPC)", that indicates bitcoind wallet and RPC are used.
