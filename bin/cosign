@@ -509,13 +509,13 @@ function cmd_raw_sign_scripthash(anypay, tx, i, scriptPubKey, txSigHash)
 				       anypay ? SIGHASH_ANYONECANPAY :
 				       SIGHASH_ALL);
 	switch (scriptType) {
-	case TX_PUBKEYHASH:
+	case Script.TX_PUBKEYHASH:
 		rc = cmd_raw_sign_pubkeyhash(anypay, tx, i, scriptPubKey, txSigHash);
 		break;
-	case TX_MULTISIG:
+	case Script.TX_MULTISIG:
 		rc = cmd_raw_sign_multisig(anypay, tx, i, scriptPubKey, txSigHash);
 		break;
-	case TX_PUBKEY:
+	case Script.TX_PUBKEY:
 		rc = cmd_raw_sign_pubkey(anypay, tx, i, scriptPubKey, txSigHash);
 		break;
 	default:
@@ -552,18 +552,18 @@ function cmd_raw_sign_internal2(anypay, tx, inputIdx, scriptObj)
 				       anypay ? Transaction.SIGHASH_ANYONECANPAY :
 				       Transaction.SIGHASH_ALL);
 	switch (scriptType) {
-	case TX_UNKNOWN:
+	case Script.TX_UNKNOWN:
 		break;
-	case TX_PUBKEYHASH:
+	case Script.TX_PUBKEYHASH:
 		rc = cmd_raw_sign_pubkeyhash(anypay, tx, inputIdx, scriptPubKey, txSigHash);
 		break;
-	case TX_SCRIPTHASH:
+	case Script.TX_SCRIPTHASH:
 		rc = cmd_raw_sign_scripthash(anypay, tx, inputIdx, scriptPubKey, txSigHash);
 		break;
-	case TX_MULTISIG:
+	case Script.TX_MULTISIG:
 		rc = cmd_raw_sign_multisig(anypay, tx, inputIdx, scriptPubKey, txSigHash);
 		break;
-	case TX_PUBKEY:
+	case Script.TX_PUBKEY:
 		rc = cmd_raw_sign_pubkey(anypay, tx, inputIdx, scriptPubKey, txSigHash);
 		break;
 	}
