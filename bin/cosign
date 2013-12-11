@@ -15,19 +15,23 @@ var coinUtil = require('libcoin/util/util');
 var Parser = require('libcoin/util/BinaryParser').class();
 var bignum = require('bignum');
 var TXTOOL_VERSION = '0.2';
-var rpc = new BitcoinRPC({
-		'port' : 18332,
-		'user' : 'user',
-		'pass' : 'pass',
-		'protocol' : 'http'
-});
 
 program
 	.version(TXTOOL_VERSION)
 	.option('-f, --file [file]', 'Load/store transaction state to/from JSON file [txstatedb.json]', 'txstatedb.json')
 	.option('-P, --pass [passphrase]', 'AES wallet passphrase')
 	.option('-w, --wallet [file]', 'AES wallet filename')
+	.option('--rpcport [port]', 'Bitcoind RPC port [18332]', Number, 18332)
+	.option('--rpcuser [user]', 'Bitcoind RPC user [user]', String, 'user')
+	.option('--rpcpass [password]', 'Bitcoind RPC password [pass]', String, 'pass')
 	.parse(process.argv);
+
+var rpc = new BitcoinRPC({
+		'port' : program.rpcport,
+		'user' : program.rpcuser,
+		'pass' : program.rpcpass,
+		'protocol' : 'http'
+});
 
 var statedb_fn = program.file;
 
@@ -56,7 +60,7 @@ function wallet_store()
 
 if (program.wallet) {
 	var wallet = new Wallet();
-	wallet.datastore.client = 'txtool';
+	wallet.datastore.client = 'cosign';
 	wallet.datastore.client_version = TXTOOL_VERSION;
 	wallet.datastore.network = 'livenet';
 
@@ -65,7 +69,7 @@ if (program.wallet) {
 
 function list_commands()
 {
-	var s = "txtool command summary:\n";
+	var s = "cosign command summary:\n";
 	s += "clean\t\tRemove transaction state database\n";
 	s += "dump\t\tInspect internal transaction state\n";
 	s += "help\t\tList this command summary\n";
@@ -505,13 +509,13 @@ function cmd_raw_sign_scripthash(anypay, tx, i, scriptPubKey, txSigHash)
 				       anypay ? SIGHASH_ANYONECANPAY :
 				       SIGHASH_ALL);
 	switch (scriptType) {
-	case TX_PUBKEYHASH:
+	case Script.TX_PUBKEYHASH:
 		rc = cmd_raw_sign_pubkeyhash(anypay, tx, i, scriptPubKey, txSigHash);
 		break;
-	case TX_MULTISIG:
+	case Script.TX_MULTISIG:
 		rc = cmd_raw_sign_multisig(anypay, tx, i, scriptPubKey, txSigHash);
 		break;
-	case TX_PUBKEY:
+	case Script.TX_PUBKEY:
 		rc = cmd_raw_sign_pubkey(anypay, tx, i, scriptPubKey, txSigHash);
 		break;
 	default:
@@ -548,18 +552,18 @@ function cmd_raw_sign_internal2(anypay, tx, inputIdx, scriptObj)
 				       anypay ? Transaction.SIGHASH_ANYONECANPAY :
 				       Transaction.SIGHASH_ALL);
 	switch (scriptType) {
-	case TX_UNKNOWN:
+	case Script.TX_UNKNOWN:
 		break;
-	case TX_PUBKEYHASH:
+	case Script.TX_PUBKEYHASH:
 		rc = cmd_raw_sign_pubkeyhash(anypay, tx, inputIdx, scriptPubKey, txSigHash);
 		break;
-	case TX_SCRIPTHASH:
+	case Script.TX_SCRIPTHASH:
 		rc = cmd_raw_sign_scripthash(anypay, tx, inputIdx, scriptPubKey, txSigHash);
 		break;
-	case TX_MULTISIG:
+	case Script.TX_MULTISIG:
 		rc = cmd_raw_sign_multisig(anypay, tx, inputIdx, scriptPubKey, txSigHash);
 		break;
-	case TX_PUBKEY:
+	case Script.TX_PUBKEY:
 		rc = cmd_raw_sign_pubkey(anypay, tx, inputIdx, scriptPubKey, txSigHash);
 		break;
 	}

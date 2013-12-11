@@ -1,5 +1,5 @@
 {
-  "name": "txtool",
+  "name": "cosign",
   "description": "Bitcoin Transaction Tool",
   "version": "0.2.1",
   "author": {
@@ -14,7 +14,7 @@
   ],
   "main": "./index",
   "bin": {
-    "txtool": "./bin/txtool"
+    "cosign": "./bin/cosign"
   },
   "keywords": [
     "bitcoin",
