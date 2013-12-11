@@ -6,7 +6,7 @@ verification of what they are signing.  MITM mitigation.
 
 Errors are thrown via js exception.  This may be considered ugly,
 dumping a lot of information that may obscure one useful nugget.
-At a minimum, someone should confirm that txtool exit status is zero
+At a minimum, someone should confirm that cosign exit status is zero
 normally, but non-zero when an exception is thrown.
 
 With all parameters optional, optimist module does not appear to

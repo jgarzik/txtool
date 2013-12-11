@@ -1,18 +1,18 @@
 
-txtool may be used to pass around and sign incomplete (not yet fully
+cosign may be used to pass around and sign incomplete (not yet fully
 signed) transactions.
 
 In this example, someone has emailed the raw hex data for a bitcoin
 transaction, UNSIGNED.TXT.  The user signs the transaction, and then
 emails SIGNED.TXT to another party.
 
-$ ./txtool init
-$ ./txtool raw.read UNSIGNED.TXT
-$ ./txtool raw.sign
-$ ./txtool raw.write SIGNED.TXT
+$ ./cosign init
+$ ./cosign raw.read UNSIGNED.TXT
+$ ./cosign raw.sign
+$ ./cosign raw.write SIGNED.TXT
 
 Additionally, if the transaction is complete -- raw.sign reports
 "sigs:complete" -- then the transaction may be broadcast on the network.
 
-$ ./txtool raw.send
+$ ./cosign raw.send
 
